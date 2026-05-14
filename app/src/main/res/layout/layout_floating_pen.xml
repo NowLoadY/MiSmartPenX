@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pen_card"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pill"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingStart="14dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:id="@+id/pen_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="✎"
+        android:textColor="#B3FFFFFF"
+        android:textSize="11sp"
+        android:layout_marginEnd="6dp" />
+
+    <TextView
+        android:id="@+id/pen_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="100.0%"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium" />
+
+    <ImageView
+        android:id="@+id/charge_icon"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_charging"
+        android:tint="#FFFFFF"
+        android:visibility="gone" />
+</LinearLayout>

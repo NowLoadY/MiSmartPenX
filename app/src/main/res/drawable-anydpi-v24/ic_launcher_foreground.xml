@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#1A1A1A"
+        android:pathData="M0,0h108v108h-108z" />
+    <!-- 笔杆 -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M72.5,35.5 L40.5,67.5 L37,73 L42.5,69.5 L74.5,37.5 Z" />
+    <!-- 笔尖 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37,73 L35,75 L38,74 Z" />
+</vector>

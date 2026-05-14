@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MiSmartPenX</string>
+    <string name="noti_channel_name">服务状态通知</string>
+    <string name="noti_title">小米笔监控运行中</string>
+    <string name="noti_text">正在自动感应触控笔状态</string>
+    <string name="noti_action_show">显示悬浮窗</string>
+    <string name="noti_action_hide">隐藏悬浮窗</string>
+    <string name="perm_request_overlay">请授予“悬浮窗”权限以开启电量胶囊</string>
+    <string name="perm_request_noti">请授予通知权限以保持后台运行</string>
+</resources>
