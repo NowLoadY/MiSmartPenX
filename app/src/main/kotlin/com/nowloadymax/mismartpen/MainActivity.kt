@@ -7,7 +7,9 @@ package com.nowloadymax.mismartpen
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -21,36 +23,67 @@ import com.google.android.material.slider.Slider
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var prefs: SharedPreferences
+    private lateinit var thresholdSlider: Slider
+    private lateinit var thresholdLabel: TextView
+    private lateinit var alphaSlider: Slider
+    private lateinit var alphaLabel: TextView
+
+    // 监听配置变化，实现双向同步
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, key ->
+        when (key) {
+            "threshold" -> {
+                val value = sharedPrefs.getInt(key, 20).toFloat()
+                if (thresholdSlider.value != value) {
+                    thresholdSlider.value = value
+                    thresholdLabel.text = "弹出电量阈值: ${value.toInt()}%"
+                }
+            }
+            "alpha" -> {
+                val value = sharedPrefs.getInt(key, 85).toFloat()
+                if (alphaSlider.value != value) {
+                    alphaSlider.value = value
+                    alphaLabel.text = "胶囊透明度: ${value.toInt()}%"
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val prefs = getSharedPreferences("config", Context.MODE_PRIVATE)
+        prefs = getSharedPreferences("config", Context.MODE_PRIVATE)
         
-        // Threshold Slider
-        val thresholdLabel = findViewById<TextView>(R.id.threshold_label)
-        val thresholdSlider = findViewById<Slider>(R.id.threshold_slider)
+        thresholdLabel = findViewById(R.id.threshold_label)
+        thresholdSlider = findViewById(R.id.threshold_slider)
+        alphaLabel = findViewById(R.id.alpha_label)
+        alphaSlider = findViewById(R.id.alpha_slider)
+
+        // 初始化数据
         val savedThreshold = prefs.getInt("threshold", 20).toFloat()
         thresholdSlider.value = savedThreshold
         thresholdLabel.text = "弹出电量阈值: ${savedThreshold.toInt()}%"
-        
-        thresholdSlider.addOnChangeListener { _, value, _ ->
-            thresholdLabel.text = "弹出电量阈值: ${value.toInt()}%"
-            prefs.edit().putInt("threshold", value.toInt()).apply()
-            notifyService()
-        }
 
-        // Alpha Slider
-        val alphaLabel = findViewById<TextView>(R.id.alpha_label)
-        val alphaSlider = findViewById<Slider>(R.id.alpha_slider)
         val savedAlpha = prefs.getInt("alpha", 85).toFloat()
         alphaSlider.value = savedAlpha
         alphaLabel.text = "胶囊透明度: ${savedAlpha.toInt()}%"
         
-        alphaSlider.addOnChangeListener { _, value, _ ->
-            alphaLabel.text = "胶囊透明度: ${value.toInt()}%"
-            prefs.edit().putInt("alpha", value.toInt()).apply()
-            notifyService()
+        // 设置监听器
+        thresholdSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                thresholdLabel.text = "弹出电量阈值: ${value.toInt()}%"
+                prefs.edit().putInt("threshold", value.toInt()).commit()
+                syncConfigToService()
+            }
+        }
+
+        alphaSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                alphaLabel.text = "胶囊透明度: ${value.toInt()}%"
+                prefs.edit().putInt("alpha", value.toInt()).commit()
+                syncConfigToService()
+            }
         }
 
         // Colors
@@ -62,13 +95,28 @@ class MainActivity : AppCompatActivity() {
         checkPermissionsAndStart()
     }
 
-    private fun updateColor(hex: String) {
-        getSharedPreferences("config", Context.MODE_PRIVATE).edit().putString("color_normal", hex).apply()
-        notifyService()
+    override fun onResume() {
+        super.onResume()
+        prefs.registerOnSharedPreferenceChangeListener(prefListener)
     }
 
-    private fun notifyService() {
-        val intent = Intent(this, PenMonitorService::class.java).apply { action = "REFRESH_CONFIG" }
+    override fun onPause() {
+        super.onPause()
+        prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
+    }
+
+    private fun updateColor(hex: String) {
+        prefs.edit().putString("color_normal", hex).commit()
+        syncConfigToService()
+    }
+
+    private fun syncConfigToService() {
+        val intent = Intent(this, PenMonitorService::class.java).apply { 
+            action = "REFRESH_CONFIG"
+            putExtra("threshold", prefs.getInt("threshold", 20))
+            putExtra("alpha", prefs.getInt("alpha", 85))
+            putExtra("color_normal", prefs.getString("color_normal", "#1A1A1A"))
+        }
         startForegroundService(intent)
     }
 
